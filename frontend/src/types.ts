@@ -1,3 +1,12 @@
+export interface Packet {
+  timestamp: number
+  length: number
+  src_ip: string
+  dst_ip: string
+  packet_number: number
+  tcp_flags: string | null
+}
+
 export interface Connection {
   src_ip: string
   dst_ip: string
@@ -5,6 +14,8 @@ export interface Connection {
   src_port: number
   dst_port: number
   tcp_termination: 'FIN' | 'RST' | 'Timeout' | null
+  packet_count: number
+  packets: Packet[]
 }
 
 export interface AnalyzeResponse {

@@ -1,12 +1,22 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 
 class TerminationReason(str, Enum):
     FIN = "FIN"
     RST = "RST"
     TIMEOUT = "Timeout"
+
+
+@dataclass
+class Packet:
+    timestamp: float
+    length: int
+    src_ip: str
+    dst_ip: str
+    packet_number: int        # 1-based index in the pcap file
+    tcp_flags: Optional[str] = None
 
 
 @dataclass
@@ -17,3 +27,5 @@ class Connection:
     src_port: int
     dst_port: int
     tcp_termination: Optional[TerminationReason] = None
+    packet_count: int = 0
+    packets: List[Packet] = field(default_factory=list)

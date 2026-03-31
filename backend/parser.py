@@ -3,7 +3,7 @@ import socket
 from io import BytesIO
 from typing import List
 
-from .models import Connection, TerminationReason
+from .models import Connection, Packet, TerminationReason
 
 # Magic bytes for format detection
 _PCAP_MAGIC_LE = b'\xd4\xc3\xb2\xa1'
@@ -66,8 +66,10 @@ class PcapParser:
         # connection_map: key → {'src_ip', 'dst_ip', 'proto_num', 'src_port',
         #                         'dst_port', 'seen_fin', 'seen_rst'}
         connection_map: dict = {}
+        global_pkt_num = 0
 
-        for _ts, raw in reader:
+        for ts, raw in reader:
+            global_pkt_num += 1
             # Try to unwrap Ethernet frame
             try:
                 eth = dpkt.ethernet.Ethernet(raw)
@@ -106,8 +108,11 @@ class PcapParser:
                 src_port, dst_port = 0, 0
 
             key = (src_ip, dst_ip, proto_num, src_port, dst_port)
-
-            if key not in connection_map:
+            # Use canonical key so both directions map to the same flow
+            rev_key = (dst_ip, src_ip, proto_num, dst_port, src_port)
+            if rev_key in connection_map:
+                key = rev_key
+            elif key not in connection_map:
                 connection_map[key] = {
                     'src_ip': src_ip,
                     'dst_ip': dst_ip,
@@ -116,15 +121,41 @@ class PcapParser:
                     'dst_port': dst_port,
                     'seen_fin': False,
                     'seen_rst': False,
+                    'packet_count': 0,
+                    'packets': [],
                 }
 
-            # Track TCP flags
+            connection_map[key]['packet_count'] += 1
+
+            # Build TCP flags string
+            tcp_flags = None
+            if proto_num == 6 and isinstance(transport, dpkt.tcp.TCP):
+                flags = transport.flags
+                flag_parts = []
+                if flags & dpkt.tcp.TH_SYN: flag_parts.append('SYN')
+                if flags & dpkt.tcp.TH_ACK: flag_parts.append('ACK')
+                if flags & dpkt.tcp.TH_FIN: flag_parts.append('FIN')
+                if flags & dpkt.tcp.TH_RST: flag_parts.append('RST')
+                if flags & dpkt.tcp.TH_PUSH: flag_parts.append('PSH')
+                if flags & dpkt.tcp.TH_URG: flag_parts.append('URG')
+                tcp_flags = '+'.join(flag_parts) if flag_parts else '—'
+
+            # Track TCP termination flags
             if proto_num == 6 and isinstance(transport, dpkt.tcp.TCP):
                 flags = transport.flags
                 if flags & dpkt.tcp.TH_RST:
                     connection_map[key]['seen_rst'] = True
                 if flags & dpkt.tcp.TH_FIN:
                     connection_map[key]['seen_fin'] = True
+
+            connection_map[key]['packets'].append(Packet(
+                timestamp=float(ts),
+                length=len(raw),
+                src_ip=src_ip,
+                dst_ip=dst_ip,
+                packet_number=global_pkt_num,
+                tcp_flags=tcp_flags,
+            ))
 
         # Build Connection objects
         connections: List[Connection] = []
@@ -149,6 +180,8 @@ class PcapParser:
                 src_port=flow['src_port'],
                 dst_port=flow['dst_port'],
                 tcp_termination=termination,
+                packet_count=flow['packet_count'],
+                packets=flow['packets'],
             ))
 
         return connections
