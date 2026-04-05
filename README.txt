@@ -6,6 +6,14 @@ A web application for uploading and analyzing PCAP/PCAPNG network capture files.
 
 REQUIREMENTS
 ------------
+General requirments to run the dev environment 
+download and install kiro
+download and install git
+download and install Node.js
+download and install python
+
+to run the pcap_analyzer app
+------------
 - Python 3.9+
 - Node.js 18+
 
@@ -13,7 +21,7 @@ REQUIREMENTS
 BACKEND SETUP
 -------------
 1. Open a terminal and navigate to the project root:
-   cd kiro-pcap_analyzer
+   cd 007_repo
 
 2. Install Python dependencies:
    pip install -r backend/requirements.txt
@@ -27,7 +35,7 @@ BACKEND SETUP
 FRONTEND SETUP
 --------------
 1. Open a second terminal and navigate to the frontend folder:
-   cd kiro-pcap_analyzer/frontend
+   cd 007_repo/frontend
 
 2. Install Node dependencies (first time only):
    npm install
