@@ -5,6 +5,11 @@ export interface Packet {
   dst_ip: string
   packet_number: number
   tcp_flags: string | null
+  http_method: string | null
+  http_uri: string | null
+  dns_query: string | null
+  dns_type: string | null
+  dns_response: string | null
 }
 
 export interface Connection {
@@ -16,6 +21,11 @@ export interface Connection {
   tcp_termination: 'FIN' | 'RST' | 'Timeout' | null
   packet_count: number
   packets: Packet[]
+  http_method: string | null
+  http_uri: string | null
+  dns_query: string | null
+  dns_type: string | null
+  dns_response: string | null
 }
 
 export interface AnalyzeResponse {

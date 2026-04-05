@@ -51,6 +51,52 @@ def _get_ports(transport) -> tuple[int, int]:
     return 0, 0
 
 
+# DNS record type number → name
+_DNS_TYPES = {
+    1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 12: 'PTR',
+    15: 'MX', 16: 'TXT', 28: 'AAAA', 33: 'SRV', 255: 'ANY',
+}
+
+
+def _parse_dns(payload: bytes):
+    """Parse a DNS UDP payload. Returns (query_name, record_type, response) or (None, None, None)."""
+    try:
+        dns = dpkt.dns.DNS(payload)
+    except Exception:
+        return None, None, None
+
+    query_name = None
+    record_type = None
+    response = None
+
+    if dns.qd:
+        q = dns.qd[0]
+        query_name = q.name
+        record_type = _DNS_TYPES.get(q.type, str(q.type))
+
+    # Only responses (QR flag set) carry answers
+    if dns.qr == dpkt.dns.DNS_R and dns.an:
+        answers = []
+        for rr in dns.an:
+            rtype = _DNS_TYPES.get(rr.type, str(rr.type))
+            try:
+                if rr.type == dpkt.dns.DNS_A:
+                    answers.append(socket.inet_ntoa(rr.rdata))
+                elif rr.type == dpkt.dns.DNS_AAAA:
+                    answers.append(socket.inet_ntop(socket.AF_INET6, rr.rdata))
+                elif rr.type in (dpkt.dns.DNS_CNAME, dpkt.dns.DNS_PTR, dpkt.dns.DNS_NS):
+                    answers.append(rr.cname if hasattr(rr, 'cname') else rr.rdata.decode('utf-8', errors='ignore'))
+                elif rr.type == dpkt.dns.DNS_MX:
+                    answers.append(rr.mxname if hasattr(rr, 'mxname') else str(rr.rdata))
+                else:
+                    answers.append(f'[{rtype}]')
+            except Exception:
+                answers.append(f'[{rtype}]')
+        response = ', '.join(answers) if answers else None
+
+    return query_name, record_type, response
+
+
 class PcapParser:
     """Parse pcap/pcapng bytes and return a list of Connection objects."""
 
@@ -127,6 +173,30 @@ class PcapParser:
 
             connection_map[key]['packet_count'] += 1
 
+            # Parse HTTP method and URI from TCP payload (ports 80 or 443)
+            http_method = None
+            http_uri = None
+            if proto_num == 6 and isinstance(transport, dpkt.tcp.TCP):
+                payload = bytes(transport.data)
+                if payload:
+                    try:
+                        first_line = payload.split(b'\r\n', 1)[0].decode('utf-8', errors='ignore')
+                        parts = first_line.split(' ')
+                        http_methods = {'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE'}
+                        if len(parts) >= 2 and parts[0] in http_methods:
+                            http_method = parts[0]
+                            http_uri = parts[1]
+                    except Exception:
+                        pass
+
+            # Parse DNS from UDP port 53
+            dns_query = None
+            dns_type = None
+            dns_response = None
+            if proto_num == 17 and isinstance(transport, dpkt.udp.UDP):
+                if transport.sport == 53 or transport.dport == 53:
+                    dns_query, dns_type, dns_response = _parse_dns(bytes(transport.data))
+
             # Build TCP flags string
             tcp_flags = None
             if proto_num == 6 and isinstance(transport, dpkt.tcp.TCP):
@@ -155,7 +225,22 @@ class PcapParser:
                 dst_ip=dst_ip,
                 packet_number=global_pkt_num,
                 tcp_flags=tcp_flags,
+                http_method=http_method,
+                http_uri=http_uri,
+                dns_query=dns_query,
+                dns_type=dns_type,
+                dns_response=dns_response,
             ))
+            # Store first HTTP request seen on this connection
+            if http_method and not connection_map[key].get('http_method'):
+                connection_map[key]['http_method'] = http_method
+                connection_map[key]['http_uri'] = http_uri
+            # Store DNS query (from query packet) and response (from response packet)
+            if dns_query and not connection_map[key].get('dns_query'):
+                connection_map[key]['dns_query'] = dns_query
+                connection_map[key]['dns_type'] = dns_type
+            if dns_response and not connection_map[key].get('dns_response'):
+                connection_map[key]['dns_response'] = dns_response
 
         # Build Connection objects
         connections: List[Connection] = []
@@ -182,6 +267,11 @@ class PcapParser:
                 tcp_termination=termination,
                 packet_count=flow['packet_count'],
                 packets=flow['packets'],
+                http_method=flow.get('http_method'),
+                http_uri=flow.get('http_uri'),
+                dns_query=flow.get('dns_query'),
+                dns_type=flow.get('dns_type'),
+                dns_response=flow.get('dns_response'),
             ))
 
         return connections

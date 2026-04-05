@@ -17,6 +17,11 @@ class Packet:
     dst_ip: str
     packet_number: int        # 1-based index in the pcap file
     tcp_flags: Optional[str] = None
+    http_method: Optional[str] = None
+    http_uri: Optional[str] = None
+    dns_query: Optional[str] = None
+    dns_type: Optional[str] = None
+    dns_response: Optional[str] = None
 
 
 @dataclass
@@ -29,3 +34,8 @@ class Connection:
     tcp_termination: Optional[TerminationReason] = None
     packet_count: int = 0
     packets: List[Packet] = field(default_factory=list)
+    http_method: Optional[str] = None
+    http_uri: Optional[str] = None
+    dns_query: Optional[str] = None
+    dns_type: Optional[str] = None
+    dns_response: Optional[str] = None
