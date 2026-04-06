@@ -48,7 +48,7 @@ export default function App() {
             <div style={{ color: '#666', fontSize: 12, padding: '20px 24px 0', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
               Connections — {connections.length} found
             </div>
-            <div style={{ overflowX: 'auto', padding: '0 24px 20px' }}>
+            <div style={{ padding: '0 24px 20px', maxWidth: '100%', overflowX: 'scroll', overflowY: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
               <ConnectionTable connections={connections} />
             </div>
           </div>

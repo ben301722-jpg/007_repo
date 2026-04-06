@@ -39,6 +39,9 @@ const thStyle: React.CSSProperties = {
   borderRight: '1px solid #16375a',
   fontSize: 13,
   textAlign: 'left',
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
 }
 
 const tdStyle: React.CSSProperties = {
@@ -147,7 +150,7 @@ export default function ConnectionTable({ connections }: Props) {
 
       {/* Table */}
       <div>
-        <table style={{ borderCollapse: 'collapse', width: 'max-content', minWidth: '100%', fontSize: 13 }}>
+        <table style={{ borderCollapse: 'collapse', width: 'max-content', fontSize: 13 }}>
           <thead>
             <tr>
               {visibleColumns.map(({ label, key }) => (
@@ -158,7 +161,7 @@ export default function ConnectionTable({ connections }: Props) {
             </tr>
             <tr style={{ background: '#2e6099' }}>
               {visibleColumns.map(({ key }) => (
-                <th key={key} style={{ padding: '4px 6px' }}>
+                <th key={key} style={{ padding: '4px 6px', position: 'sticky', top: 40, background: '#2e6099', zIndex: 1 }}>
                   <input
                     type="text" placeholder="Filter... (!val to exclude)"
                     value={filters[key] ?? ''}
