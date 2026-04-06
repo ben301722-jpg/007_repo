@@ -44,11 +44,13 @@ export default function App() {
         </div>
 
         {connections.length > 0 && (
-          <div style={{ background: '#fff', border: '1px solid #dde3ea', borderRadius: 8, padding: '20px 24px' }}>
-            <div style={{ color: '#666', fontSize: 12, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1 }}>
+          <div style={{ background: '#fff', border: '1px solid #dde3ea', borderRadius: 8, overflow: 'hidden' }}>
+            <div style={{ color: '#666', fontSize: 12, padding: '20px 24px 0', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
               Connections — {connections.length} found
             </div>
-            <ConnectionTable connections={connections} />
+            <div style={{ overflowX: 'auto', padding: '0 24px 20px' }}>
+              <ConnectionTable connections={connections} />
+            </div>
           </div>
         )}
       </main>

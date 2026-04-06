@@ -115,7 +115,7 @@ export default function ConnectionTable({ connections }: Props) {
   if (connections.length === 0) return null
 
   return (
-    <div>
+    <div style={{ minWidth: 0 }}>
       {selectedConn && (
         <PacketModal connection={selectedConn} onClose={() => setSelectedConn(null)} />
       )}
@@ -146,8 +146,8 @@ export default function ConnectionTable({ connections }: Props) {
       </div>
 
       {/* Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
+      <div>
+        <table style={{ borderCollapse: 'collapse', width: 'max-content', minWidth: '100%', fontSize: 13 }}>
           <thead>
             <tr>
               {visibleColumns.map(({ label, key }) => (
