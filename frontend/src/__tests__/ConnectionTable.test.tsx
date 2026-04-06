@@ -10,6 +10,13 @@ const baseConnection: Connection = {
   src_port: 12345,
   dst_port: 80,
   tcp_termination: 'FIN',
+  packet_count: 0,
+  packets: [],
+  http_method: null,
+  http_uri: null,
+  dns_query: null,
+  dns_type: null,
+  dns_response: null,
 }
 
 describe('ConnectionTable', () => {

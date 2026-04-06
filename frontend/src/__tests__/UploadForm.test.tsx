@@ -14,7 +14,6 @@ describe('UploadForm', () => {
 
   it('file input has accept=".pcap,.pcapng"', () => {
     render(<UploadForm onResult={onResult} onError={onError} onLoadingChange={onLoadingChange} />)
-    const input = screen.getByRole('button', { hidden: true })
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     expect(fileInput).not.toBeNull()
     expect(fileInput.accept).toBe('.pcap,.pcapng')

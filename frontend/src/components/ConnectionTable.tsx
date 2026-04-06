@@ -95,7 +95,11 @@ export default function ConnectionTable({ connections }: Props) {
     return columns.every(({ key }) => {
       const f = filters[key]?.toLowerCase() ?? ''
       if (!f) return true
-      return String(conn[key] ?? '').toLowerCase().includes(f)
+      const negate = f.startsWith('!')
+      const term = negate ? f.slice(1) : f
+      if (!term) return true
+      const cellVal = String(conn[key] ?? '').toLowerCase()
+      return negate ? !cellVal.includes(term) : cellVal.includes(term)
     })
   })
 
@@ -156,10 +160,14 @@ export default function ConnectionTable({ connections }: Props) {
               {visibleColumns.map(({ key }) => (
                 <th key={key} style={{ padding: '4px 6px' }}>
                   <input
-                    type="text" placeholder="Filter..."
+                    type="text" placeholder="Filter... (!val to exclude)"
                     value={filters[key] ?? ''}
                     onChange={e => handleFilter(key, e.target.value)}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '3px 6px', borderRadius: 3, border: 'none', fontSize: 12 }}
+                    style={{
+                      width: '100%', boxSizing: 'border-box', padding: '3px 6px', borderRadius: 3, border: 'none', fontSize: 12,
+                      background: filters[key]?.startsWith('!') ? '#fff0f0' : '#fff',
+                      color: filters[key]?.startsWith('!') ? '#a00' : '#000',
+                    }}
                   />
                 </th>
               ))}
@@ -182,7 +190,7 @@ export default function ConnectionTable({ connections }: Props) {
                       (conn.tcp_termination === 'RST' || conn.tcp_termination === 'Timeout')
                     return (
                       <td key={key} style={{ ...tdStyle, ...(isAlert ? { background: '#f4cccc', fontWeight: 700, color: '#a00' } : {}) }}>
-                        {conn[key] ?? ''}
+                        {conn[key] != null && typeof conn[key] !== 'object' ? String(conn[key]) : ''}
                       </td>
                     )
                   })}
