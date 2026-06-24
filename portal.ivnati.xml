@@ -1,0 +1,63 @@
+<configuration xmlns="http://xml.pulsesecure.net/ive-sa/9.1R2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" iveData="3207" saData="3203">
+    <authentication>
+        <signin>
+            <urls>
+                <access-urls>
+                    <access-url>
+                        <url-pattern>portal.ivnati.com/example/</url-pattern>
+                        <description></description>
+                        <enabled>true</enabled>
+                        <page>Example_Portal</page>
+                        <realm-select>pick-list</realm-select>
+                        <user>
+                            <meeting-url>*/meeting/</meeting-url>
+                            <realms>Example_Realm</realms>
+                            <pre-authentication-signin-notification-id>None</pre-authentication-signin-notification-id>
+                            <post-authentication-signin-notification-id>None</post-authentication-signin-notification-id>
+                            <post-authentication-signin-notification-skip>false</post-authentication-signin-notification-skip>
+                            <enable-new-ux-pages>false</enable-new-ux-pages>
+                        </user>
+                    </access-url>
+                </access-urls>
+            </urls>
+            <pages>
+                <access-pages>
+                    <access-page>
+                        <name>Example_Portal</name>
+                        <standard>
+                            <welcome>Welcome to</welcome>
+                            <portal>Example Portal</portal>
+                            <signin-button-text>Sign In</signin-button-text>
+                            <instructions>Please sign in to begin your secure session.&lt;br&gt;&lt;br&gt;&lt;noscript&gt;Note: Javascript is disabled on your browser.&lt;/noscript&gt;</instructions>
+                            <cloud-secure-instructions>Please sign in to begin your secure session.&lt;br&gt;&lt;br&gt;&lt;noscript&gt;Note: Javascript is disabled on your browser.&lt;/noscript&gt;</cloud-secure-instructions>
+                            <user-name>Username</user-name>
+                            <password-label>Password</password-label>
+                            <realm>Realm</realm>
+                            <secondary-auth-user-name>Secondary username</secondary-auth-user-name>
+                            <secondary-auth-password-label>Secondary password</secondary-auth-password-label>
+                            <secondary-auth-prompts-in-next-page>false</secondary-auth-prompts-in-next-page>
+                            <pulse-custom-prompts>false</pulse-custom-prompts>
+                            <signout-message>Your session has ended. For increased security, please close your browser.</signout-message>
+                            <signin-again>Click here to sign in again</signin-again>
+                            <background-color>#E3E3E3</background-color>
+                            <missing-cert-message>Missing certificate. Check that your certificate is valid and up-to-date, and try again.</missing-cert-message>
+                            <invalid-cert-message>Invalid or expired certificate. Check that your certificate is valid and up-to-date, and try again.</invalid-cert-message>
+                            <show-help>false</show-help>
+                            <help-button-message>Help</help-button-message>
+                            <pre-authentication-signin-notification-title>Pre Sign-In Notification</pre-authentication-signin-notification-title>
+                            <pre-authentication-signin-notification-proceed>Proceed</pre-authentication-signin-notification-proceed>
+                            <pre-authentication-signin-notification-show-decline>true</pre-authentication-signin-notification-show-decline>
+                            <pre-authentication-signin-notification-decline>Decline</pre-authentication-signin-notification-decline>
+                            <pre-authentication-signin-notification-decline-message>You are not allowed to sign in to the system.</pre-authentication-signin-notification-decline-message>
+                            <post-authentication-signin-notification-title>Post Sign-In Notification</post-authentication-signin-notification-title>
+                            <post-authentication-signin-notification-proceed>Proceed</post-authentication-signin-notification-proceed>
+                            <post-authentication-signin-notification-show-decline>true</post-authentication-signin-notification-show-decline>
+                            <post-authentication-signin-notification-decline>Decline</post-authentication-signin-notification-decline>
+                            <post-authentication-signin-notification-decline-message>You are not allowed to sign in to the system. Your sign-in has been canceled.</post-authentication-signin-notification-decline-message>
+                        </standard>
+                    </access-page>
+                </access-pages>
+            </pages>
+        </signin>
+    </authentication>
+</configuration>
